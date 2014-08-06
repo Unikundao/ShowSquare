@@ -135,7 +135,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		cx = 350;	// H-size
-		cy = 90;	// V-size
+		cy = 80;	// V-size
 		MoveWindow(hWnd, 0, 0, cx, cy, FALSE);
 		break;
 	case WM_PAINT:
