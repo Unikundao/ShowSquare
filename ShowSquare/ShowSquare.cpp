@@ -99,15 +99,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    hInst = hInstance; // グローバル変数にインスタンス処理を格納します。
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+   hWnd = CreateWindowEx(WS_EX_TOOLWINDOW, szWindowClass, szTitle, WS_POPUP,
+	   CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {
       return FALSE;
    }
 
-   ShowWindow(hWnd, nCmdShow);
+   ShowWindow(hWnd, SW_SHOWNOACTIVATE);
    UpdateWindow(hWnd);
 
    return TRUE;
@@ -125,40 +125,43 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
+	HBRUSH hbr;
+	RECT		rcWnd;
+	int			cx, cy;
 
 	switch (message)
 	{
-	case WM_COMMAND:
-		wmId    = LOWORD(wParam);
-		wmEvent = HIWORD(wParam);
-		// 選択されたメニューの解析:
-		switch (wmId)
-		{
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
+	case WM_CREATE:
+		cx = 350;	// H-size
+		cy = 90;	// V-size
+		MoveWindow(hWnd, 0, 0, cx, cy, FALSE);
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		// TODO: 描画コードをここに追加してください...
+
+		// draw green rect
+		hbr = CreateSolidBrush(RGB(0, 255, 0));	// green brush
+		GetClientRect(hWnd, &rcWnd);
+		FillRect(hdc, &rcWnd, hbr);
+		DeleteObject(hbr);
+
 		EndPaint(hWnd, &ps);
+		return 0;
+	case WM_MBUTTONDOWN:	// M-button to show about dialog
+		DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+		return 0;
+	case WM_RBUTTONUP:	// R-button to close window
+		PostMessage(hWnd, WM_CLOSE, 0, 0);
+		return 0;
+	case WM_CLOSE:
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return 0;
 	}
-	return 0;
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 // バージョン情報ボックスのメッセージ ハンドラーです。
